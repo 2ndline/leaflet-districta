@@ -6,7 +6,7 @@
    (change)="valueSelected()">
 -->
 	<select  placeholder="Column to filter"
-  [(ngModel)]="selectedColumn" (change)="valueSelected()">
-  <option *ngFor="let column of columns">{{ column }}</option>
+  [(ngModel)]="selectedColumn.id" (change)="valueSelected()">
+  <option *ngFor="let column of columns">{{ column.id }}</option>
 </select>
 </div>

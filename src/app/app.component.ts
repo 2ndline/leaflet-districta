@@ -9,6 +9,7 @@ import {
 } from "./models/precinct-voter-data.model";
 import { Precinct } from "./models/precinct.model";
 import { MapDataService } from "./services/map-data.service";
+import { MapColumn } from "./models/mapColumn";
 
 @Component({
   selector: "my-app",
@@ -19,8 +20,7 @@ export class AppComponent implements OnInit {
   map: L.Map;
   markers: L.Marker[] = [];
   total: PrecinctVoterData;
-  public selectedColumn: string = "giarrussoPercent";
-  public columns: string[] = [];
+  public selectedColumn: MapColumn;
   constructor(private http: HttpClient, private dataService: MapDataService) {}
   public precincts: Precinct[] = [];
   precintGeoJson: L.GeoJSON<any>;
@@ -142,6 +142,7 @@ export class AppComponent implements OnInit {
   setPrecinctLayers() {
     let districtA = this.DistrictAPrecincts;
     let selectedColumn = this.selectedColumn;
+    let totalColumn = this.total;
     let prs: Precinct[] = this.precincts;
     // Load geojson file
     this.http.get(this.precinctUrl).subscribe((json: any) => {
@@ -156,20 +157,32 @@ export class AppComponent implements OnInit {
         if (districtA.includes(precinctId)) {
           //style layer & bind popup
           pr.layer["options"].weight = 1;
-          let amount: number = pr.data[selectedColumn];
-          let red = 255;
-          let green = 0;
-          if (amount >= 0.5) {
-            let diff = 1 - amount;
-            red = 510 * diff;
-            green = 255;
+          let amount: number = pr.data[selectedColumn.id];
+          if (selectedColumn.total) {
+            let red = 255;
+            let green = 0;
+            let blue = 0;
+            //TODO - calculate RGB for totals
+            pr.layer["options"].fillColor = `"rgb(${Math.round(
+              red
+            )}, ${Math.round(green)}, ${Math.round(blue)})`;
+            pr.layer["options"].fillOpacity = 0.8;
           } else {
-            green = 510 * amount;
-            red = 255;
+            let red = 255;
+            let green = 0;
+            if (amount >= selectedColumn.average) {
+              let diff = 1 - amount;
+              red = 510 * diff;
+              green = 255;
+            } else {
+              green = 510 * amount;
+              red = 255;
+            }
+            pr.layer["options"].fillColor =
+              "rgb(" + Math.round(red) + "," + Math.round(green) + ",0)";
+            pr.layer["options"].fillOpacity = 0.8;
           }
-          pr.layer["options"].fillColor =
-            "rgb(" + Math.round(red) + "," + Math.round(green) + ",0)";
-          pr.layer["options"].fillOpacity = 0.8;
+
           pr.layer.bindPopup(`<pre>${JSON.stringify(pr.data, null, 2)}</pre>`);
         } else {
           pr.layer["options"].weight = 0;
@@ -188,6 +201,7 @@ export class AppComponent implements OnInit {
   }
 
   precinctVoterData: PrecinctVoterData[];
+  columns: MapColumn[] = [];
 
   loadPrecinctData() {
     this.dataService.fetchDataFromSheet(this.sheetUrl).subscribe(results => {
@@ -196,7 +210,15 @@ export class AppComponent implements OnInit {
         let voterData = this.precinctVoterData[i];
         if (voterData.precinct == "Total") {
           this.total = voterData;
-          this.columns = Object.keys(voterData);
+          this.columns = [];
+          Object.keys(voterData).forEach(column => {
+            this.columns.push({
+              id: column,
+              average: voterData[column] < 1 ? voterData[column] : null,
+              total: voterData[column] > 1 ? voterData[column] : null
+            });
+          });
+
           this.selectedColumn = this.columns[0];
           continue;
         }
