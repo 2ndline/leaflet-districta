@@ -193,13 +193,4 @@ export class AppComponent implements OnInit {
     );
     this.drawMap();
   }
-  /**
-   * NTH
-   * * hide some of the leaflet rendering
-   * * pretty up the interface
-   * * pull & parse voter data directly from SOS website - https://voterportal.sos.la.gov/static/ and select from dropdowns
-   * * display overlays from other city maps
-   * * pull in addresses to display on map
-   * * tabular data display
-   */
 }
