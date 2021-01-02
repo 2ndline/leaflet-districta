@@ -60,63 +60,76 @@ export class AppComponent implements OnInit {
 
   public sheetUrl = "1syXU60xTSCtHoePb7Yobh892SfdNTlYp1zuxyLPOtQg";
 
+  drawMap() {
+    var selectedColumn = this.selectedColumn;
+    var prs = this.precincts;
+    let eachFunc = function(f, l) {
+      const precinctId = f.properties.PRECINCTID;
+      let pr: Precinct = prs[precinctId];
+      if (!pr) {
+        pr = { id: precinctId };
+      }
+      pr.feature = f;
+      pr.layer = l;
+      if (DistrictAPrecincts.includes(precinctId)) {
+        //style layer & bind popup
+        pr.layer["options"].weight = 1;
+        let amount: number = pr.data[selectedColumn.id];
+        if (selectedColumn.columnType === "total") {
+          let red = 255;
+          let green = 0;
+          let blue = 0;
+          //TODO - calculate RGB for totals
+          pr.layer["options"].fillColor = `"rgb(${Math.round(
+            red
+          )}, ${Math.round(green)}, ${Math.round(blue)})`;
+          pr.layer["options"].fillOpacity = 0.8;
+        } else if (selectedColumn.columnType === "average") {
+          let red = 255;
+          let green = 0;
+          if (amount >= 0.5) {
+            let diff = 1 - amount;
+            red = 510 * diff;
+            green = 255;
+          } else {
+            green = 510 * amount;
+            red = 255;
+          }
+          pr.layer["options"].fillColor =
+            "rgb(" + Math.round(red) + "," + Math.round(green) + ",0)";
+          pr.layer["options"].fillOpacity = 0.8;
+        }
+
+        pr.layer.bindPopup(`<pre>${JSON.stringify(pr.data, null, 2)}</pre>`);
+      } else {
+        pr.layer["options"].weight = 0;
+      }
+    };
+
+    if (this.precintGeoJson) {
+      this.precintGeoJson.remove();
+    }
+
+    this.precintGeoJson = L.geoJSON(this.json, {
+      onEachFeature: eachFunc
+    });
+    this.precintGeoJson.setStyle({
+      color: "black"
+    });
+    this.precincts = prs;
+    this.precintGeoJson.addTo(this.map);
+  }
+
+  json: any;
+
   setPrecinctLayers() {
     let selectedColumn = this.selectedColumn;
     let totalColumn = this.total;
     let prs: Precinct[] = this.precincts;
     // Load geojson file
     this.http.get(this.precinctUrl).subscribe((json: any) => {
-      let eachFunc = function(f, l) {
-        const precinctId = f.properties.PRECINCTID;
-        let pr: Precinct = prs[precinctId];
-        if (!pr) {
-          pr = { id: precinctId };
-        }
-        pr.feature = f;
-        pr.layer = l;
-        if (DistrictAPrecincts.includes(precinctId)) {
-          //style layer & bind popup
-          pr.layer["options"].weight = 1;
-          let amount: number = pr.data[selectedColumn.id];
-          if (selectedColumn.columnType === "total") {
-            let red = 255;
-            let green = 0;
-            let blue = 0;
-            //TODO - calculate RGB for totals
-            pr.layer["options"].fillColor = `"rgb(${Math.round(
-              red
-            )}, ${Math.round(green)}, ${Math.round(blue)})`;
-            pr.layer["options"].fillOpacity = 0.8;
-          } else if (selectedColumn.columnType === "average") {
-            let red = 255;
-            let green = 0;
-            if (amount >= 0.5) {
-              let diff = 1 - amount;
-              red = 510 * diff;
-              green = 255;
-            } else {
-              green = 510 * amount;
-              red = 255;
-            }
-            pr.layer["options"].fillColor =
-              "rgb(" + Math.round(red) + "," + Math.round(green) + ",0)";
-            pr.layer["options"].fillOpacity = 0.8;
-          }
-
-          pr.layer.bindPopup(`<pre>${JSON.stringify(pr.data, null, 2)}</pre>`);
-        } else {
-          pr.layer["options"].weight = 0;
-        }
-      };
-
-      this.precintGeoJson = L.geoJSON(json, {
-        onEachFeature: eachFunc
-      });
-      this.precintGeoJson.setStyle({
-        color: "black"
-      });
-      this.precincts = prs;
-      this.precintGeoJson.addTo(this.map);
+      this.json = json;
+      this.drawMap();
     });
   }
 
@@ -178,7 +191,7 @@ export class AppComponent implements OnInit {
     this.selectedColumn = this.columns.find(
       x => x.id === this.selectedColumnOption
     );
-    this.setPrecinctLayers();
+    this.drawMap();
   }
   /**
    * NTH
