@@ -134,13 +134,14 @@ export class AppComponent implements OnInit {
     this.loadPrecinctData();
   }
 
-  public precinctUrl : string=
+  public precinctUrl: string =
     "https://opendata.arcgis.com/datasets/ca0f4261673541d798551f5cddc54bd6_0.geojson";
 
   public sheetUrl = "1syXU60xTSCtHoePb7Yobh892SfdNTlYp1zuxyLPOtQg";
 
   setPrecinctLayers() {
     let districtA = this.DistrictAPrecincts;
+    let selectedColumn = this.selectedColumn;
     let prs: Precinct[] = this.precincts;
     // Load geojson file
     this.http.get(this.precinctUrl).subscribe((json: any) => {
@@ -155,7 +156,7 @@ export class AppComponent implements OnInit {
         if (districtA.includes(precinctId)) {
           //style layer & bind popup
           pr.layer["options"].weight = 1;
-          let amount: number = pr.data[this.selectedColumn];
+          let amount: number = pr.data[selectedColumn];
           let red = 255;
           let green = 0;
           if (amount >= 0.5) {
@@ -189,31 +190,29 @@ export class AppComponent implements OnInit {
   precinctVoterData: PrecinctVoterData[];
 
   loadPrecinctData() {
-    this.dataService
-      .fetchDataFromSheet(this.sheetUrl)
-      .subscribe(results => {
-        this.precinctVoterData = results;
-        for (let i = 0; i < this.precinctVoterData.length; ++i) {
-          let voterData = this.precinctVoterData[i];
-          if (voterData.precinct == "Total") {
-            this.total = voterData;
-            this.columns = Object.keys(voterData);
-            this.selectedColumn = this.columns[0];
-            continue;
-          }
-          //make sure precinct values have no leading 0s
-          let precinctNumbers: string[] = voterData.precinct.split(" ");
-          let suffix = precinctNumbers[1].includes("A") ? "A" : "";
-          let id =
-            Number(precinctNumbers[0]) +
-            "-" +
-            Number(precinctNumbers[1].replaceAll("A", "")) +
-            suffix;
-
-          this.precincts[id] = { id: id, data: voterData };
+    this.dataService.fetchDataFromSheet(this.sheetUrl).subscribe(results => {
+      this.precinctVoterData = results;
+      for (let i = 0; i < this.precinctVoterData.length; ++i) {
+        let voterData = this.precinctVoterData[i];
+        if (voterData.precinct == "Total") {
+          this.total = voterData;
+          this.columns = Object.keys(voterData);
+          this.selectedColumn = this.columns[0];
+          continue;
         }
-        this.dataLoaded.next(true);
-      });
+        //make sure precinct values have no leading 0s
+        let precinctNumbers: string[] = voterData.precinct.split(" ");
+        let suffix = precinctNumbers[1].includes("A") ? "A" : "";
+        let id =
+          Number(precinctNumbers[0]) +
+          "-" +
+          Number(precinctNumbers[1].replaceAll("A", "")) +
+          suffix;
+
+        this.precincts[id] = { id: id, data: voterData };
+      }
+      this.dataLoaded.next(true);
+    });
   }
 
   public valueSelected() {
