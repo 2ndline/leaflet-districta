@@ -218,16 +218,11 @@ export class AppComponent implements OnInit {
   public valueSelected() {
     this.setPrecinctLayers();
   }
-
-  /**
-   * TODO:
-   * 3) render precincts different if they aren't a part of the data set
-   */
-
   /**
    * NTH
    * * hide some of the leaflet rendering
-   * * pull & parse voter data directly from SOS website - https://voterportal.sos.la.gov/static/
+   * * pretty up the interface
+   * * pull & parse voter data directly from SOS website - https://voterportal.sos.la.gov/static/ and select from dropdowns
    * * display overlays from other city maps
    * * pull in addresses to display on map?
    * *
