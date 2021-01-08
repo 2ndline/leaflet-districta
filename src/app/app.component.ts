@@ -75,7 +75,6 @@ export class AppComponent implements OnInit {
 
         let red = 255;
         let green = 0;
-        let blue = 0;
         let value = amount;
         if (selectedColumn.columnType === "total") {
           value = amount / selectedColumn.max;
@@ -139,15 +138,15 @@ export class AppComponent implements OnInit {
             this.columns.push({
               id: column,
               columnType:
-                voterData[column] === "Total"
+                voterData[column.id] === "Total"
                   ? "header"
-                  : voterData[column] < 1
+                  : voterData[column.id] < 1
                   ? "average"
                   : "total",
-              average: voterData[column] < 1 ? voterData[column] : 0.0,
-              total: voterData[column] > 1 ? voterData[column] : null,
-              min: voterData[column] < 1 ? 0 : null,
-              max: voterData[column] < 1 ? 0 : null
+              average: voterData[column.id] < 1 ? voterData[column.id] : 0.0,
+              total: voterData[column.id] > 1 ? voterData[column.id] : null,
+              min: voterData[column.id] < 1 ? 0 : null,
+              max: voterData[column.id] < 1 ? 0 : null
             });
           });
           this.selectedColumn = this.columns[0];
@@ -163,13 +162,25 @@ export class AppComponent implements OnInit {
           suffix;
 
         this.precincts[id] = { id: id, data: voterData };
-        Object.keys(voterData).forEach(column => {
-          if (voterData[column].columnType === "total") {
-            if (this.columns[column].min > voterData[column]) {
-              this.columns[column].min = voterData[column];
+        var columnNames = Object.keys(voterData);
+        for(let i = 0; i < columnNames.length; ++ i){
+          let column = this.columns[i];
+          if (column.columnType === "total") {
+            if (column.min > voterData[column.id]) {
+              console.log(
+                `Updating min from ${column.min} to ${
+                  voterData[column.id]
+                }`
+              );
+              column.min = voterData[column.id];
             }
-            if (this.columns[column].min > voterData[column]) {
-              this.columns[column].min = voterData[column];
+            if (column.max < voterData[column.id]) {
+              console.log(
+                `Updating max from ${column.max} to ${
+                  voterData[column.id]
+                }`
+              );
+              column.max = voterData[column.id];
             }
           }
         });
