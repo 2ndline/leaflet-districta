@@ -168,15 +168,9 @@ export class AppComponent implements OnInit {
           if (column.columnType === "total") {
             var total: number = parseInt(voterData[column.id]);
             if (column.min === null || column.min > total) {
-              console.log(
-                `Updating ${column.id}.min from ${column.min} to ${total}`
-              );
               column.min = total;
             }
             if (column.min === null || column.max < total) {
-              console.log(
-                `Updating ${column.id}.max from ${column.max} to ${total}`
-              );
               column.max = total;
             }
           }
