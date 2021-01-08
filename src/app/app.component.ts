@@ -69,31 +69,31 @@ export class AppComponent implements OnInit {
         //style layer & bind popup
         pr.layer["options"].weight = 1;
         let amount: number = pr.data[selectedColumn.id];
-        if (selectedColumn.columnType === "total") {
-          let red = 255;
-          let green = 0;
-          let blue = 0;
-          //TODO - calculate RGB for totals
-          pr.layer["options"].fillColor = `"rgb(${Math.round(
-            red
-          )}, ${Math.round(green)}, ${Math.round(blue)})`;
-          pr.layer["options"].fillOpacity = 0.8;
-        } else if (selectedColumn.columnType === "average") {
-          let red = 255;
-          let green = 0;
-          if (amount >= 0.5) {
-            let diff = 1 - amount;
-            red = 510 * diff;
-            green = 255;
-          } else {
-            green = 510 * amount;
-            red = 255;
-          }
-          pr.layer["options"].fillColor =
-            "rgb(" + Math.round(red) + "," + Math.round(green) + ",0)";
-          pr.layer["options"].fillOpacity = 0.8;
+        if (selectedColumn.columnType === "header") {
+          return;
         }
 
+        let red = 255;
+        let green = 0;
+        let blue = 0;
+        let value = amount;
+        if (selectedColumn.columnType === "total") {
+          value = amount / selectedColumn.max;
+          if (value > 1) {
+            value = 1;
+          }
+        }
+        if (amount >= 0.5) {
+          let diff = 1 - amount;
+          red = 510 * diff;
+          green = 255;
+        } else {
+          green = 510 * amount;
+          red = 255;
+        }
+        pr.layer["options"].fillColor =
+          "rgb(" + Math.round(red) + "," + Math.round(green) + ",0)";
+        pr.layer["options"].fillOpacity = 0.8;
         pr.layer.bindPopup(`<pre>${JSON.stringify(pr.data, null, 2)}</pre>`);
       } else {
         pr.layer["options"].weight = 0;

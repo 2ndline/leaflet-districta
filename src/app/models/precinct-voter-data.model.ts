@@ -11,8 +11,7 @@ export const characterAttributesMapping = {
   totalVotes2015: "Total Votes",
   turnout2015: "Turnout",
   registeredVoters2015: "registeredVoters2015",
-  registeredVoters2020: "registeredVoters2020",
-  giarrussoOveralPercent: "JoeOverall%"
+  registeredVoters2020: "registeredVoters2020"
 };
 
 export interface PrecinctVoterData {
@@ -29,5 +28,4 @@ export interface PrecinctVoterData {
   turnout2015: number;
   registeredVoters2015: number;
   registeredVoters2020: number;
-  giarrussoOveralPercent: number;
 }
