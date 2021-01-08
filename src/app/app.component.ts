@@ -163,27 +163,23 @@ export class AppComponent implements OnInit {
 
         this.precincts[id] = { id: id, data: voterData };
         var columnNames = Object.keys(voterData);
-        for(let i = 0; i < columnNames.length; ++ i){
+        for (let i = 0; i < columnNames.length; ++i) {
           let column = this.columns[i];
           if (column.columnType === "total") {
             if (column.min > voterData[column.id]) {
               console.log(
-                `Updating min from ${column.min} to ${
-                  voterData[column.id]
-                }`
+                `Updating min from ${column.min} to ${voterData[column.id]}`
               );
               column.min = voterData[column.id];
             }
             if (column.max < voterData[column.id]) {
               console.log(
-                `Updating max from ${column.max} to ${
-                  voterData[column.id]
-                }`
+                `Updating max from ${column.max} to ${voterData[column.id]}`
               );
               column.max = voterData[column.id];
             }
           }
-        });
+        }
       }
       this.dataLoaded.next(true);
     });
